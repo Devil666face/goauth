@@ -10,6 +10,10 @@ import (
 	"github.com/gofiber/fiber/v2/utils"
 )
 
+var (
+	Csrf string = "csrf"
+)
+
 func SetCsrf(app fiber.Router) {
 	app.Use(csrf.New(csrf.Config{
 		Storage:        store.Storage,

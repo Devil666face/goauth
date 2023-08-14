@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	PASS_LEN int = 6
+	PASS_LEN int    = 6
+	User     string = "User"
 )
 
 func AuthMiddleware(c *fiber.Ctx) error {
@@ -40,13 +41,13 @@ func AuthMiddleware(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
 	}
 	u.Password = ""
-	c.Locals("User", u)
+	c.Locals(User, u)
 
 	return c.Next()
 }
 
 func SuperUserMiddleware(c *fiber.Ctx) error {
-	u := c.Locals("User")
+	u := c.Locals(User)
 	user, ok := u.(*models.User)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
@@ -71,19 +72,19 @@ func LoginPost(c *fiber.Ctx) error {
 
 	r := models.GetUserByUsername(u, f.Username)
 	if errors.Is(r.Error, gorm.ErrRecordNotFound) {
-		if c.Locals("HTMX").(bool) {
+		if c.Locals(Htmx).(bool) {
 			return c.Status(fiber.StatusOK).SendString("<div>Missmatch username or password</biv>")
 		}
 		return c.Status(fiber.StatusOK).Render("templates/login", fiber.Map{
 			"Message": "Missmatch username or password",
-			"csrf":    c.Locals("csrf")},
+			Csrf:      c.Locals(Csrf)},
 		)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(f.Password)); err != nil {
 		return c.Status(fiber.StatusOK).Render("templates/login", fiber.Map{
 			"Message": "Missmatch username or password",
-			"csrf":    c.Locals("csrf")},
+			Csrf:      c.Locals(Csrf)},
 		)
 	}
 
@@ -101,7 +102,7 @@ func LoginPost(c *fiber.Ctx) error {
 }
 
 func CreateNewUserGet(c *fiber.Ctx) error {
-	return c.Render("templates/userform", fiber.Map{"csrf": c.Locals("csrf")})
+	return c.Render("templates/userform", fiber.Map{Csrf: c.Locals(Csrf)})
 }
 
 func CreateNewUserPost(c *fiber.Ctx) error {
@@ -177,10 +178,10 @@ func Health(c *fiber.Ctx) error {
 }
 
 func UserGet(c *fiber.Ctx) error {
-	u := c.Locals("User")
+	u := c.Locals(User)
 	user, ok := u.(*models.User)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
 	}
-	return c.Status(fiber.StatusOK).Render("templates/index", fiber.Map{"User": user})
+	return c.Status(fiber.StatusOK).Render("templates/index", fiber.Map{User: user})
 }

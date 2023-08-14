@@ -8,10 +8,15 @@ func SetHtmx(app fiber.Router) {
 	app.Use(HtmxMiddleware)
 }
 
+var (
+	Htmx      string = "HTMX"
+	HxRequest string = "Hx-Request"
+)
+
 func HtmxMiddleware(c *fiber.Ctx) error {
-	c.Locals("HTMX", false)
-	if _, ok := c.GetReqHeaders()["Hx-Request"]; ok {
-		c.Locals("HTMX", true)
+	c.Locals(Htmx, false)
+	if _, ok := c.GetReqHeaders()[HxRequest]; ok {
+		c.Locals(Htmx, true)
 	}
 	return c.Next()
 }
