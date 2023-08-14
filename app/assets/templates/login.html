@@ -1,0 +1,28 @@
+<div id="message">
+	{{.Message}}
+</div>
+<form method="POST" hx-post="/auth/login" hx-target="#message">
+	<input type="hidden" name="csrf" value="{{.csrf}}">
+	<p>Please use the following form to login.</p>
+	<br>
+	<div>
+		<label>Username:
+			<input name="username" required placeholder="Username" type="text" value="{{.Username}}" autofocus>
+		</label>
+	</div>
+	<br>
+	<div>
+		<label>Password:
+			<input name="password" required placeholder="Password" type="password" value="">
+		</label>
+	</div>
+	<div>
+		<input type="submit" value="Login">
+	</div>
+</form>
+<script src="https://unpkg.com/htmx.org@1.9.4"></script>
+<script type="text/javascript">
+	document.body.addEventListener('htmx:configRequest', (event) => {
+		event.detail.headers['X-CSRFToken'] = '{{.csrf}}';
+	})
+</script>

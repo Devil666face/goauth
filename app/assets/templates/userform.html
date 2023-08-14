@@ -1,0 +1,35 @@
+<form action="/auth/new" method="POST">
+	<input type="hidden" name="csrf" value="{{.csrf}}">
+	<p>Please use the following form to login.</p>
+	<div>
+		{{.Message}}
+	</div>
+	<br>
+	<div>
+		<label>Username:
+			<input name="username" required placeholder="Username" type="text" value="{{.Username}}" autofocus>
+		</label>
+	</div>
+	<br>
+	<div>
+		<label>Password:
+			<input name="password" required placeholder="Password" type="password" value="">
+		</label>
+	</div>
+	<br>
+	<div>
+		<label>Confirm password:
+			<input name="password_confirm" required placeholder="Password" type="password" value="">
+		</label>
+	</div>
+	<br>
+	<div>
+		<label>Admin:
+			<input name="admin" type="checkbox" value="admin">
+		</label>
+	</div>
+	<br>
+	<div>
+		<input type="submit" value="Register">
+	</div>
+</form>
