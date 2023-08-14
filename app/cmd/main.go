@@ -15,19 +15,17 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/template/html/v2"
 )
 
 func main() {
-
 	database.Connect()
 	database.Migrate(&models.User{})
 
-	engine := html.NewFileSystem(http.FS(assets.Viewfs), ".html")
-
 	app := fiber.New(fiber.Config{
 		ErrorHandler: utils.ErrorHandler,
-		Views:        engine,
+		Views:        html.NewFileSystem(http.FS(assets.Viewfs), ".html"),
 	})
 
 	store.SetStore()
@@ -41,5 +39,6 @@ func main() {
 	routes.SuperUserRoutes(app)
 	routes.AuthRoutes(app)
 
+	app.Get("/metrics", monitor.New(monitor.Config{Title: fmt.Sprintf("%v:%v - metrics", config.IP, config.PORT)}))
 	app.Listen(fmt.Sprintf("%v:%v", config.IP, config.PORT))
 }

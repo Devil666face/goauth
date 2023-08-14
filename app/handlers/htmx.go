@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -15,6 +13,5 @@ func HtmxMiddleware(c *fiber.Ctx) error {
 	if _, ok := c.GetReqHeaders()["Hx-Request"]; ok {
 		c.Locals("HTMX", true)
 	}
-	fmt.Println(c.Locals("HTMX"))
 	return c.Next()
 }
