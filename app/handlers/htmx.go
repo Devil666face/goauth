@@ -4,14 +4,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetHtmx(app fiber.Router) {
-	app.Use(HtmxMiddleware)
-}
-
 var (
 	Htmx      string = "HTMX"
 	HxRequest string = "Hx-Request"
 )
+
+func SetHtmx(app fiber.Router) {
+	app.Use(HtmxMiddleware)
+}
 
 func HtmxMiddleware(c *fiber.Ctx) error {
 	c.Locals(Htmx, false)

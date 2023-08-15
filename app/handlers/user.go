@@ -6,9 +6,9 @@ import (
 
 	"auth/app/models"
 	"auth/app/store"
+	"auth/app/utils"
 
 	"github.com/gofiber/fiber/v2"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -19,10 +19,6 @@ var (
 
 func AuthMiddleware(c *fiber.Ctx) error {
 	session, err := store.Store.Get(c)
-
-	// if strings.Split(c.Path(), "/")[1] == "auth" {
-	// 	return c.Next()
-	// }
 
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
@@ -72,16 +68,17 @@ func LoginPost(c *fiber.Ctx) error {
 
 	r := models.GetUserByUsername(u, f.Username)
 	if errors.Is(r.Error, gorm.ErrRecordNotFound) {
-		if c.Locals(Htmx).(bool) {
-			return c.Status(fiber.StatusOK).SendString("<div>Missmatch username or password</biv>")
-		}
+		// if c.Locals(Htmx).(bool) {
+		// 	return c.Status(fiber.StatusOK).SendString("<div>Missmatch username or password</biv>")
+		// }
 		return c.Status(fiber.StatusOK).Render("templates/login", fiber.Map{
 			"Message": "Missmatch username or password",
 			Csrf:      c.Locals(Csrf)},
 		)
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(f.Password)); err != nil {
+	// if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(f.Password)); err != nil {
+	if err := utils.CompareHashAndPassword(u.Password, f.Password); err != nil {
 		return c.Status(fiber.StatusOK).Render("templates/login", fiber.Map{
 			"Message": "Missmatch username or password",
 			Csrf:      c.Locals(Csrf)},
@@ -133,7 +130,7 @@ func CreateNewUserPost(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).Render("templates/userform", fiber.Map{"Message": fmt.Sprintf("User %s already exists", f.Username)})
 	}
 
-	password, bcerr := bcrypt.GenerateFromPassword([]byte(f.Password), 14)
+	password, bcerr := utils.GetHash(f.Password)
 	if bcerr != nil {
 		return bcerr
 	}
@@ -149,7 +146,7 @@ func CreateNewUserPost(c *fiber.Ctx) error {
 	if err.Error != nil {
 		return err.Error
 	}
-	return c.Status(fiber.StatusOK).Render("templates/login", fiber.Map{"Message": "Succesful create user", "Username": u.Username})
+	return c.Status(fiber.StatusOK).Render("templates/userform", fiber.Map{"Message": fmt.Sprintf("Succesful create user %s", u.Username)})
 }
 
 func LogoutGet(c *fiber.Ctx) error {

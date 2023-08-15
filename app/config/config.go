@@ -23,3 +23,11 @@ func getEnv(name string, fallback string) string {
 
 	panic(fmt.Sprintf(`Environment variable not found %v`, name))
 }
+
+func GetSuperuser() (string, string) {
+	var (
+		USER = getEnv("SUUSER", "superuser")
+		PASS = getEnv("SUPASS", "Qwerty123!")
+	)
+	return USER, PASS
+}
