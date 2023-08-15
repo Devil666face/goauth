@@ -68,9 +68,6 @@ func LoginPost(c *fiber.Ctx) error {
 
 	r := models.GetUserByUsername(u, f.Username)
 	if errors.Is(r.Error, gorm.ErrRecordNotFound) {
-		// if c.Locals(Htmx).(bool) {
-		// 	return c.Status(fiber.StatusOK).SendString("<div>Missmatch username or password</biv>")
-		// }
 		return c.Status(fiber.StatusOK).Render("templates/login", fiber.Map{
 			"Message": "Missmatch username or password",
 			Csrf:      c.Locals(Csrf)},
@@ -182,3 +179,8 @@ func UserGet(c *fiber.Ctx) error {
 	}
 	return c.Status(fiber.StatusOK).Render("templates/index", fiber.Map{User: user})
 }
+
+// [HTMX Middleware]
+// if c.Locals(Htmx).(bool) {
+// 	return c.Status(fiber.StatusOK).SendString("<div>Missmatch username or password</biv>")
+// }

@@ -5,7 +5,6 @@ import (
 	"html/template"
 
 	"github.com/gofiber/template/html/v2"
-	// "github.com/gofiber/template/django/v3"
 )
 
 func Csrf(token interface{}) template.HTML {

@@ -10,4 +10,7 @@ var Viewfs embed.FS
 //go:embed static/*
 var Staticfs embed.FS
 
-var Mediafs string = "media"
+var (
+	Mediadir  string = "media"
+	Staticdir string = "static"
+)
