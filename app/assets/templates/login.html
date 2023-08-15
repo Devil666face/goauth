@@ -1,22 +1,26 @@
-<div id="message">
-	{{.Message}}
-</div>
-<form method="POST" action="/auth/login">
-	{{ Csrf .csrf }}
-	<p>Please use the following form to login.</p>
-	<br>
-	<div>
-		<label>Username:
-			<input name="username" required placeholder="Username" type="text" value="{{.Username}}" autofocus>
-		</label>
-	</div>
-	<br>
-	<div>
-		<label>Password:
-			<input name="password" required placeholder="Password" type="password" value="">
-		</label>
-	</div>
-	<div>
-		<input type="submit" value="Login">
-	</div>
-</form>
+{{template "head" . }}
+
+<body class="">
+	<main class="form-signin w-100 m-auto">
+		<form method="POST" enctype="multipart/form-data" action="/auth/login">
+			{{ Csrf .csrf }}
+			<h1 class=" h3 mb-3 fw-normal">Sing in</h1>
+			{{ if .Message }}
+			<div class="alert alert-danger text-left" role="alert">{{ .Message }}</div>
+			{{ end }}
+			<div class="form-floating">
+				<input type="text" name="username" autofocus="" autocapitalize="none" autocomplete="username" maxlength="150"
+					required="" id="id_username" class="form-control" placeholder="Login" value="{{.Username}}">
+				<label for="floatingInput">Username</label>
+			</div>
+			<div class="form-floating">
+				<input type="password" name="password" autocomplete="current-password" required="" id="id_password"
+					class="form-control" placeholder="Password">
+				<label for="floatingPassword">Password</label>
+			</div>
+			<button class="btn btn-outline-primary w-100 py-2" type="submit">Login</button>
+		</form>
+	</main>
+</body>
+
+{{template "tail" . }}

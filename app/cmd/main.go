@@ -56,12 +56,12 @@ func main() {
 		app.Use("/static", filesystem.New(filesystem.Config{
 			Root:       http.FS(assets.Staticfs),
 			PathPrefix: "static",
-			Browse:     true,
+			Browse:     false,
 		}))
 		app.Static("/media", utils.SetMediaPath(assets.Mediafs), fiber.Static{
 			Compress:  true,
 			ByteRange: true,
-			Browse:    true,
+			Browse:    false,
 		})
 		app.Get("/metrics", monitor.New(monitor.Config{Title: fmt.Sprintf("%v:%v - metrics", config.IP, config.PORT)}))
 

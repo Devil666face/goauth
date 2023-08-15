@@ -1,0 +1,19 @@
+{{define "tail"}}
+<html>
+
+<body>
+	{{template "theme" . }}
+	<script type="text/javascript" src="/static/js/popper.min.js" defer></script>
+	<script type="text/javascript" src="/static/js/bootstrap.bundle.min.js" defer></script>
+	<script type="text/javascript" src="/static/js/htmx.min.js" defer></script>
+	<script type="text/javascript" src="/static/js/lordicon.min.js" defer></script>
+	<script type="text/javascript" src="/static/js/main.js" defer></script>
+	<script type="text/javascript">
+		document.body.addEventListener('htmx:configRequest', (event) => {
+			event.detail.headers['X-CSRFToken'] = '{{ .csrf }}';
+		})
+	</script>
+</body>
+
+</html>
+{{end}}
