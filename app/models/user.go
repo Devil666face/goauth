@@ -23,10 +23,20 @@ func CreateUser(user *User) *gorm.DB {
 	return database.DB.Create(user)
 }
 
-func GetUser(dest *User, user string) *gorm.DB {
-	return database.DB.First(dest, user)
+func UpdateUser(user *User) *gorm.DB {
+	return database.DB.Save(user)
+}
+
+func GetUser(dest *User, id string) *gorm.DB {
+	return database.DB.First(dest, id)
 }
 
 func GetUserByUsername(dest *User, username string) *gorm.DB {
 	return database.DB.Where("username= ?", username).Take(&dest)
+}
+
+func GetAllUsers() []User {
+	var users []User
+	database.DB.Find(&users)
+	return users
 }

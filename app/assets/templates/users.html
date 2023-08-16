@@ -1,0 +1,46 @@
+{{define "users"}}
+{{template "head" . }}
+
+<body>
+  <div class="container pt-5">
+    {{range .Users}}
+    <div class="row">
+      <div class="col">
+        {{.ID}}
+      </div>
+      <div class="col">
+        {{.Username}}
+      </div>
+      <div class="col">
+        {{if .Admin}}✅{{else}}❌{{end}}
+      </div>
+      <div class="col">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit_user"
+          hx-get="/auth/user/{{.ID}}/edit" hx-swap="innerHTML" hx-target="#edit_user_content">
+          Edit
+        </button>
+      </div>
+    </div>
+    {{end}}
+  </div>
+</body>
+
+<div class="modal fade" id="edit_user" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="edit_user_content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Understood</button>
+      </div>
+    </div>
+  </div>
+</div>
+{{template "tail" . }}
+{{end}}

@@ -55,7 +55,106 @@ func SuperUserMiddleware(c *fiber.Ctx) error {
 }
 
 func LoginPageGet(c *fiber.Ctx) error {
-	return c.Render("templates/login", fiber.Map{"csrf": c.Locals("csrf")})
+	return c.Render("templates/login", fiber.Map{Csrf: c.Locals(Csrf)})
+}
+
+func UserControlGet(c *fiber.Ctx) error {
+	users := models.GetAllUsers()
+	return c.Render("users", fiber.Map{
+		Csrf:    c.Locals(Csrf),
+		"Users": users,
+	})
+}
+
+func UserEditGet(c *fiber.Ctx) error {
+	if !c.Locals(Htmx).(bool) {
+		return fiber.ErrNotFound
+	}
+	id := c.Params("id")
+	u := new(models.User)
+	err := models.GetUser(u, id)
+	if errors.Is(err.Error, gorm.ErrRecordNotFound) {
+		return fiber.ErrNotFound
+	}
+	u.Password = ""
+	return c.Render("useredit", fiber.Map{
+		Csrf:   c.Locals(Csrf),
+		"User": u,
+	})
+}
+
+func UserEditPost(c *fiber.Ctx) error {
+	if !c.Locals(Htmx).(bool) {
+		return fiber.ErrNotFound
+	}
+	id := c.Params("id")
+	f := new(models.UserForm)
+	u := new(models.User)
+	err := models.GetUser(u, id)
+	if errors.Is(err.Error, gorm.ErrRecordNotFound) {
+		return fiber.ErrNotFound
+	}
+
+	if err := c.BodyParser(f); err != nil {
+		return err
+	}
+
+	if f.Username == "" {
+		return c.Render("useredit", fiber.Map{
+			Csrf:      c.Locals(Csrf),
+			"User":    u,
+			"Message": "Username is required.",
+		})
+	}
+
+	if f.Password == "" || f.PasswordConfirm == "" {
+		f.Password = u.Password
+		f.PasswordConfirm = u.Password
+	}
+
+	if f.Password != f.PasswordConfirm {
+		return c.Render("useredit", fiber.Map{
+			Csrf:      c.Locals(Csrf),
+			"User":    u,
+			"Message": "The passwords don't match.",
+		})
+	}
+
+	if len([]rune(f.Password)) < PASS_LEN {
+		return c.Render("useredit", fiber.Map{
+			Csrf:      c.Locals(Csrf),
+			"User":    u,
+			"Message": fmt.Sprintf("The minimum len of password is %d", PASS_LEN),
+		})
+	}
+
+	password, bcerr := utils.GetHash(f.Password)
+	if bcerr != nil {
+		return bcerr
+	}
+
+	u.Username = f.Username
+	u.Password = string(password)
+
+	if f.Admin != "" {
+		u.Admin = true
+	} else {
+		u.Admin = false
+	}
+
+	fmt.Println(f.Admin, "admin", u.Admin)
+
+	updateerr := models.UpdateUser(u)
+
+	if updateerr.Error != nil {
+		return err.Error
+	}
+
+	return c.Render("useredit", fiber.Map{
+		Csrf:      c.Locals(Csrf),
+		"User":    u,
+		"Success": fmt.Sprintf("Successful update user - %s", u.Username),
+	})
 }
 
 func LoginPost(c *fiber.Ctx) error {
