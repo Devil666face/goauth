@@ -4,3 +4,7 @@ run:
 clear:
 	rm -rf static
 	rm -rf tmp
+air:
+	~/go/bin/air
+air-install:
+	go install github.com/cosmtrek/air@latest
