@@ -12,11 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
-	PASS_LEN int    = 6
-	User     string = "User"
-)
-
 func AuthMiddleware(c *fiber.Ctx) error {
 	session, err := store.Store.Get(c)
 
@@ -32,18 +27,19 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	if uid == nil {
 		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
 	}
+
 	u := new(models.User)
 	if models.GetUser(u, fmt.Sprint(uid)); err != nil {
 		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
 	}
-	u.Password = ""
-	c.Locals(User, u)
+
+	c.Locals(models.USER, u)
 
 	return c.Next()
 }
 
 func SuperUserMiddleware(c *fiber.Ctx) error {
-	u := c.Locals(User)
+	u := c.Locals(models.USER)
 	user, ok := u.(*models.User)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
@@ -54,14 +50,11 @@ func SuperUserMiddleware(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-func LoginPageGet(c *fiber.Ctx) error {
-	return c.Render("templates/login", fiber.Map{Csrf: c.Locals(Csrf)})
-}
-
 func UserControlGet(c *fiber.Ctx) error {
 	users := models.GetAllUsers()
 	return c.Render("users", fiber.Map{
 		Csrf:    c.Locals(Csrf),
+		Htmx:    c.Locals(Htmx),
 		"Users": users,
 	})
 }
@@ -90,41 +83,86 @@ func UserEditPost(c *fiber.Ctx) error {
 	id := c.Params("id")
 	f := new(models.UserForm)
 	u := new(models.User)
-	err := models.GetUser(u, id)
-	if errors.Is(err.Error, gorm.ErrRecordNotFound) {
-		return fiber.ErrNotFound
-	}
 
 	if err := c.BodyParser(f); err != nil {
 		return err
 	}
 
-	if f.Username == "" {
-		return c.Render("useredit", fiber.Map{
-			Csrf:      c.Locals(Csrf),
-			"User":    u,
-			"Message": "Username is required.",
-		})
+	err := models.GetUser(u, id)
+	if errors.Is(err.Error, gorm.ErrRecordNotFound) {
+		return fiber.ErrNotFound
 	}
 
-	if f.Password == "" || f.PasswordConfirm == "" {
+	fmap := fiber.Map{
+		Csrf:        c.Locals(Csrf),
+		models.USER: u,
+	}
+
+	if message, ok := f.IsEmptyUsername(); ok {
+		fmap["Message"] = message
+		return c.Render("useredit", fmap)
+	}
+	if message, ok := f.IsPasswordsMatch(); ok {
+		fmap["Message"] = message
+		return c.Render("useredit", fmap)
+	}
+	if _, ok := f.IsPasswordsEmpty(); ok {
 		f.Password = u.Password
 		f.PasswordConfirm = u.Password
 	}
-
-	if f.Password != f.PasswordConfirm {
-		return c.Render("useredit", fiber.Map{
-			Csrf:      c.Locals(Csrf),
-			"User":    u,
-			"Message": "The passwords don't match.",
-		})
+	if message, ok := f.IsPasswordsShort(); ok {
+		fmap["Message"] = message
+		return c.Render("useredit", fmap)
 	}
 
-	if len([]rune(f.Password)) < PASS_LEN {
-		return c.Render("useredit", fiber.Map{
+	password, bcerr := utils.GetHash(f.Password)
+	if bcerr != nil {
+		return bcerr
+	}
+
+	u.Set(f.Username, string(password), f.IsAdmin())
+
+	updateerr := models.UpdateUser(u)
+	if updateerr.Error != nil {
+		return err.Error
+	}
+
+	fmap["Success"] = fmt.Sprintf("Successful update user - %s", u.Username)
+	return c.Render("useredit", fmap)
+}
+
+func CreateNewUserGet(c *fiber.Ctx) error {
+	if !c.Locals(Htmx).(bool) {
+		return fiber.ErrNotFound
+	}
+	return c.Render("usercreate", fiber.Map{Csrf: c.Locals(Csrf)})
+}
+
+func CreateNewUserPost(c *fiber.Ctx) error {
+	f := new(models.UserForm)
+
+	if err := c.BodyParser(f); err != nil {
+		return err
+	}
+
+	if message, ok := f.IsEmptyUsername(); ok {
+		return c.Render("usercreate", fiber.Map{
 			Csrf:      c.Locals(Csrf),
-			"User":    u,
-			"Message": fmt.Sprintf("The minimum len of password is %d", PASS_LEN),
+			"Message": message,
+		})
+	}
+	if message, ok := f.CheckPasswordForCreate(); ok {
+		return c.Render("usercreate", fiber.Map{
+			Csrf:       c.Locals(Csrf),
+			"Message":  message,
+			"Username": f.Username})
+	}
+
+	r := models.GetUserByUsername(&models.User{}, f.Username)
+	if !errors.Is(r.Error, gorm.ErrRecordNotFound) {
+		return c.Render("usercreate", fiber.Map{
+			Csrf:      c.Locals(Csrf),
+			"Message": fmt.Sprintf("User %s already exists", f.Username),
 		})
 	}
 
@@ -133,28 +171,40 @@ func UserEditPost(c *fiber.Ctx) error {
 		return bcerr
 	}
 
-	u.Username = f.Username
-	u.Password = string(password)
+	u := models.User{Username: f.Username, Password: string(password), Admin: f.IsAdmin()}
 
-	if f.Admin != "" {
-		u.Admin = true
-	} else {
-		u.Admin = false
-	}
+	err := models.CreateUser(&u)
 
-	fmt.Println(f.Admin, "admin", u.Admin)
-
-	updateerr := models.UpdateUser(u)
-
-	if updateerr.Error != nil {
+	if err.Error != nil {
 		return err.Error
 	}
-
-	return c.Render("useredit", fiber.Map{
+	return c.Render("usercreate", fiber.Map{
 		Csrf:      c.Locals(Csrf),
-		"User":    u,
-		"Success": fmt.Sprintf("Successful update user - %s", u.Username),
+		"Success": fmt.Sprintf("Succesful create user %s", u.Username),
 	})
+}
+
+func UserDeletePost(c *fiber.Ctx) error {
+	id := c.Params("id")
+	u := new(models.User)
+	err := models.GetUser(u, id)
+	if errors.Is(err.Error, gorm.ErrRecordNotFound) {
+		return fiber.ErrNotFound
+	}
+	deleterr := models.DeleteUser(u)
+	if deleterr.Error != nil {
+		return deleterr.Error
+	}
+	users := models.GetAllUsers()
+	return c.Render("users", fiber.Map{
+		Csrf:    c.Locals(Csrf),
+		Htmx:    c.Locals(Htmx),
+		"Users": users,
+	})
+}
+
+func LoginPageGet(c *fiber.Ctx) error {
+	return c.Render("login", fiber.Map{Csrf: c.Locals(Csrf)})
 }
 
 func LoginPost(c *fiber.Ctx) error {
@@ -167,15 +217,14 @@ func LoginPost(c *fiber.Ctx) error {
 
 	r := models.GetUserByUsername(u, f.Username)
 	if errors.Is(r.Error, gorm.ErrRecordNotFound) {
-		return c.Status(fiber.StatusOK).Render("templates/login", fiber.Map{
+		return c.Render("login", fiber.Map{
 			"Message": "Missmatch username or password",
 			Csrf:      c.Locals(Csrf)},
 		)
 	}
 
-	// if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(f.Password)); err != nil {
 	if err := utils.CompareHashAndPassword(u.Password, f.Password); err != nil {
-		return c.Status(fiber.StatusOK).Render("templates/login", fiber.Map{
+		return c.Render("login", fiber.Map{
 			"Message": "Missmatch username or password",
 			Csrf:      c.Locals(Csrf)},
 		)
@@ -192,57 +241,6 @@ func LoginPost(c *fiber.Ctx) error {
 		return err
 	}
 	return c.Redirect("/")
-}
-
-func CreateNewUserGet(c *fiber.Ctx) error {
-	return c.Render("templates/userform", fiber.Map{Csrf: c.Locals(Csrf)})
-}
-
-func CreateNewUserPost(c *fiber.Ctx) error {
-	f := new(models.UserForm)
-
-	if err := c.BodyParser(f); err != nil {
-		return err
-	}
-
-	if f.Username == "" {
-		return c.Status(fiber.StatusBadRequest).Render("templates/userform", fiber.Map{"Message": "Username is required."})
-	}
-
-	if f.Password == "" || f.PasswordConfirm == "" {
-		return c.Status(fiber.StatusBadRequest).Render("templates/userform", fiber.Map{"Message": "Password is required."})
-	}
-
-	if f.Password != f.PasswordConfirm {
-		return c.Status(fiber.StatusBadRequest).Render("templates/userform", fiber.Map{"Message": "The passwords don't match.", "Username": f.Username})
-	}
-
-	if len([]rune(f.Password)) < PASS_LEN {
-		return c.Status(fiber.StatusBadRequest).Render("templates/userform", fiber.Map{"Message": fmt.Sprintf("The minimum len of password is %d", PASS_LEN), "Username": f.Username})
-	}
-
-	r := models.GetUserByUsername(&models.User{}, f.Username)
-	if !errors.Is(r.Error, gorm.ErrRecordNotFound) {
-		return c.Status(fiber.StatusBadRequest).Render("templates/userform", fiber.Map{"Message": fmt.Sprintf("User %s already exists", f.Username)})
-	}
-
-	password, bcerr := utils.GetHash(f.Password)
-	if bcerr != nil {
-		return bcerr
-	}
-
-	u := models.User{Username: f.Username, Password: string(password), Admin: false}
-
-	if f.Admin != "" {
-		u.Admin = true
-	}
-
-	err := models.CreateUser(&u)
-
-	if err.Error != nil {
-		return err.Error
-	}
-	return c.Status(fiber.StatusOK).Render("templates/userform", fiber.Map{"Message": fmt.Sprintf("Succesful create user %s", u.Username)})
 }
 
 func LogoutGet(c *fiber.Ctx) error {
@@ -271,12 +269,12 @@ func Health(c *fiber.Ctx) error {
 }
 
 func UserGet(c *fiber.Ctx) error {
-	u := c.Locals(User)
+	u := c.Locals(models.USER)
 	user, ok := u.(*models.User)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
 	}
-	return c.Status(fiber.StatusOK).Render("templates/index", fiber.Map{User: user})
+	return c.Status(fiber.StatusOK).Render("templates/index", fiber.Map{models.USER: user})
 }
 
 // [HTMX Middleware]

@@ -1,0 +1,57 @@
+{{define "users"}}
+{{if not .HTMX}}
+{{template "head" . }}
+
+<body>
+  <div class="container pt-5">
+    <div class="row">
+      <div class="col">
+        <button type="button" class="btn btn-primary form-control mb-2" data-bs-toggle="modal"
+          data-bs-target="#create_user" hx-get="/auth/new" hx-swap="innerHTML" hx-target="#create_user_content">
+          Create user
+        </button>
+      </div>
+    </div>
+    <div id="users">
+      {{end}}
+      {{range .Users}}
+      <div class="row mb-2" id="user_{{.ID}}">
+        <div class=" col">
+          {{.ID}}
+        </div>
+        <div class="col">
+          {{.Username}}
+        </div>
+        <div class="col">
+          {{if .Admin}}✅{{else}}❌{{end}}
+        </div>
+        <div class="col">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit_user"
+            hx-get="/auth/user/{{.ID}}/edit" hx-swap="innerHTML" hx-target="#edit_user_content">
+            Edit
+          </button>
+        </div>
+        <div class="col">
+          <button type="button" class="btn btn-danger" hx-confirm="Delete user - {{.Username}}?" hx-swap="innerHTML"
+            hx-delete="/auth/user/{{.ID}}/delete" hx-target="#users">
+            Delete
+          </button>
+        </div>
+      </div>
+      {{end}}
+      {{if not .HTMX}}
+    </div>
+  </div>
+</body>
+
+{{with $id:="edit_user"}}
+{{template "modal" $id }}
+{{end}}
+
+{{with $id:="create_user"}}
+{{template "modal" $id }}
+{{end}}
+
+{{template "tail" . }}
+{{end}}
+{{end}}

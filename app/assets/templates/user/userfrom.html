@@ -1,0 +1,29 @@
+{{define "userform"}}
+{{ Csrf .csrf }}
+<div class="modal-body">
+  {{ if .Message }}
+  <div class="alert alert-danger text-left" role="alert">{{ .Message }}</div>
+  {{ end }}
+  {{ if .Success }}
+  <div class="alert alert-success text-left" role="alert">{{ .Success }}</div>
+  {{ end }}
+  <label>Username:</label>
+  <input name="username" required placeholder="Username" type="text" value="{{.User.Username}}" autofocus
+    class="form-control">
+  <br>
+  <label>Password:</label>
+  <input name="password" placeholder="Empty for don't edit password" type="password" value="" class="form-control" {{if
+    not .User}}required{{end}}>
+  <br>
+  <label>Confirm password:</label>
+  <input name="password_confirm" placeholder="Empty for don't edit password" type="password" value=""
+    class="form-control" {{if not .User}}required{{end}}>
+  <br>
+  <label>Admin:</label>
+  <input name="admin" type="checkbox" value="admin" {{if .User.Admin}}checked{{end}} class="form-check-label">
+  <br>
+</div>
+<div class="modal-footer">
+  <input type="submit" value="{{if .User}}Edit{{else}}Create{{end}}" class="btn btn-primary" class="form-control">
+</div>
+{{end}}
