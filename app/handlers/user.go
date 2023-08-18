@@ -106,8 +106,7 @@ func UserEditPost(c *fiber.Ctx) error {
 		return c.Render("useredit", fmap)
 	}
 	if _, ok := f.IsPasswordsEmpty(); ok {
-		f.Password = u.Password
-		f.PasswordConfirm = u.Password
+		f.Password, f.PasswordConfirm = u.Password, u.Password
 	}
 	if message, ok := f.IsPasswordsShort(); ok {
 		fmap["Message"] = message
