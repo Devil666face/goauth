@@ -51,11 +51,10 @@ func SuperUserMiddleware(c *fiber.Ctx) error {
 }
 
 func UserControlGet(c *fiber.Ctx) error {
-	users := models.GetAllUsers()
 	return c.Render("users", fiber.Map{
 		Csrf:    c.Locals(Csrf),
 		Htmx:    c.Locals(Htmx),
-		"Users": users,
+		"Users": models.GetAllUsers(),
 	})
 }
 
@@ -195,11 +194,10 @@ func UserDeletePost(c *fiber.Ctx) error {
 	if deleterr.Error != nil {
 		return deleterr.Error
 	}
-	users := models.GetAllUsers()
 	return c.Render("users", fiber.Map{
 		Csrf:    c.Locals(Csrf),
 		Htmx:    c.Locals(Htmx),
-		"Users": users,
+		"Users": models.GetAllUsers(),
 	})
 }
 
