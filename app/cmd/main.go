@@ -60,7 +60,9 @@ func main() {
 		rebed.Write(assets.Staticfs, ".")
 		app.Static("/static", utils.SetPath(assets.Staticdir), staticConfig)
 		app.Static("/media", utils.SetPath(assets.Mediadir), staticConfig)
-		app.Get("/metrics", monitor.New(monitor.Config{Title: fmt.Sprintf("%v:%v - metrics", config.IP, config.PORT)}))
+		app.Get("/metrics", monitor.New(monitor.Config{
+			Title: fmt.Sprintf("%v:%v - metrics", config.IP, config.PORT),
+		}))
 		app.Use(logger.New())
 		app.Listen(fmt.Sprintf("%v:%v", config.IP, config.PORT))
 	}
