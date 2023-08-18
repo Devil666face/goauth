@@ -1,25 +1,27 @@
 {{define "login"}}
-{{template "head" . }}
+{{with $title:="Login"}}
+{{template "head" $title }}
+{{end}}
 
 <body class="">
 	<main class="form-signin w-100 m-auto">
 		<form method="POST" enctype="multipart/form-data" action="/auth/login">
 			{{ Csrf .csrf }}
-			<h1 class=" h3 mb-3 fw-normal">Sing in</h1>
+			<h1 class=" h3 mb-3 fw-normal">Sing in 🚪</h1>
 			{{ if .Message }}
 			<div class="alert alert-danger text-left" role="alert">{{ .Message }}</div>
 			{{ end }}
 			<div class="form-floating">
 				<input type="text" name="username" autofocus="" autocapitalize="none" autocomplete="username" maxlength="150"
 					required="" id="id_username" class="form-control" placeholder="Login" value="{{.Username}}">
-				<label for="floatingInput">Username</label>
+				<label for="floatingInput">Username ➡</label>
 			</div>
 			<div class="form-floating">
 				<input type="password" name="password" autocomplete="current-password" required="" id="id_password"
 					class="form-control" placeholder="Password">
-				<label for="floatingPassword">Password</label>
+				<label for="floatingPassword">Password 🔒</label>
 			</div>
-			<button class="btn btn-outline-primary w-100 py-2" type="submit">Login</button>
+			<button class="btn btn-outline-primary w-100 py-2" type="submit">Login 🔑</button>
 		</form>
 	</main>
 </body>

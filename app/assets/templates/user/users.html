@@ -1,14 +1,16 @@
 {{define "users"}}
 {{if not .HTMX}}
-{{template "head" . }}
+{{with $title:="User list"}}
+{{template "head" $title }}
+{{end}}
 
 <body>
   <div class="container pt-5">
     <div class="row">
       <div class="col">
-        <button type="button" class="btn btn-primary form-control mb-2" data-bs-toggle="modal"
+        <button type="button" class="btn btn-outline-primary form-control mb-2" data-bs-toggle="modal"
           data-bs-target="#create_user" hx-get="/auth/new" hx-swap="innerHTML" hx-target="#create_user_content">
-          Create user
+          Create user 🙍‍♂️
         </button>
       </div>
     </div>
@@ -26,15 +28,15 @@
           {{if .Admin}}✅{{else}}❌{{end}}
         </div>
         <div class="col">
-          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit_user"
+          <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#edit_user"
             hx-get="/auth/user/{{.ID}}/edit" hx-swap="innerHTML" hx-target="#edit_user_content">
-            Edit
+            Edit 📝
           </button>
         </div>
         <div class="col">
-          <button type="button" class="btn btn-danger" hx-confirm="Delete user - {{.Username}}?" hx-swap="innerHTML"
-            hx-delete="/auth/user/{{.ID}}/delete" hx-target="#users">
-            Delete
+          <button type="button" class="btn btn-outline-danger" hx-confirm="🗑 Delete user - {{.Username}}?"
+            hx-swap="innerHTML" hx-delete="/auth/user/{{.ID}}/delete" hx-target="#users">
+            Delete 🗑
           </button>
         </div>
       </div>
