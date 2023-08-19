@@ -10,8 +10,8 @@ import (
 	"github.com/gofiber/fiber/v2/utils"
 )
 
-var (
-	Csrf string = "csrf"
+const (
+	CSRF string = "csrf"
 )
 
 func SetCsrf(app fiber.Router) {

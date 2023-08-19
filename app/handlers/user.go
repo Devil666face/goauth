@@ -16,21 +16,21 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	session, err := store.Store.Get(c)
 
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
+		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
 	}
 
 	if session.Get(store.AUTH_KEY) == nil {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
+		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
 	}
 
 	uid := session.Get(store.USER_ID)
 	if uid == nil {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
+		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
 	}
 
 	u := new(models.User)
 	if models.GetUser(u, fmt.Sprint(uid)); err != nil {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
+		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
 	}
 
 	c.Locals(models.USER, u)
@@ -42,7 +42,7 @@ func SuperUserMiddleware(c *fiber.Ctx) error {
 	u := c.Locals(models.USER)
 	user, ok := u.(*models.User)
 	if !ok {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
+		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
 	}
 	if !user.Admin {
 		return fiber.ErrNotFound
@@ -52,14 +52,14 @@ func SuperUserMiddleware(c *fiber.Ctx) error {
 
 func UserControlGet(c *fiber.Ctx) error {
 	return c.Render("users", fiber.Map{
-		Csrf:    c.Locals(Csrf),
-		Htmx:    c.Locals(Htmx),
+		CSRF:    c.Locals(CSRF),
+		HTMX:    c.Locals(HTMX),
 		"Users": models.GetAllUsers(),
 	})
 }
 
 func UserEditGet(c *fiber.Ctx) error {
-	if !c.Locals(Htmx).(bool) {
+	if !c.Locals(HTMX).(bool) {
 		return fiber.ErrNotFound
 	}
 	id := c.Params("id")
@@ -70,13 +70,13 @@ func UserEditGet(c *fiber.Ctx) error {
 	}
 	u.Password = ""
 	return c.Render("useredit", fiber.Map{
-		Csrf:   c.Locals(Csrf),
-		"User": u,
+		CSRF:        c.Locals(CSRF),
+		models.USER: u,
 	})
 }
 
 func UserEditPost(c *fiber.Ctx) error {
-	if !c.Locals(Htmx).(bool) {
+	if !c.Locals(HTMX).(bool) {
 		return fiber.ErrNotFound
 	}
 	id := c.Params("id")
@@ -93,7 +93,7 @@ func UserEditPost(c *fiber.Ctx) error {
 	}
 
 	fmap := fiber.Map{
-		Csrf:        c.Locals(Csrf),
+		CSRF:        c.Locals(CSRF),
 		models.USER: u,
 	}
 
@@ -129,14 +129,14 @@ func UserEditPost(c *fiber.Ctx) error {
 	return c.Render("useredit", fmap)
 }
 
-func CreateNewUserGet(c *fiber.Ctx) error {
-	if !c.Locals(Htmx).(bool) {
+func UserCreateGet(c *fiber.Ctx) error {
+	if !c.Locals(HTMX).(bool) {
 		return fiber.ErrNotFound
 	}
-	return c.Render("usercreate", fiber.Map{Csrf: c.Locals(Csrf)})
+	return c.Render("usercreate", fiber.Map{CSRF: c.Locals(CSRF)})
 }
 
-func CreateNewUserPost(c *fiber.Ctx) error {
+func UserCreatePost(c *fiber.Ctx) error {
 	f := new(models.UserForm)
 
 	if err := c.BodyParser(f); err != nil {
@@ -145,13 +145,13 @@ func CreateNewUserPost(c *fiber.Ctx) error {
 
 	if message, ok := f.IsEmptyUsername(); ok {
 		return c.Render("usercreate", fiber.Map{
-			Csrf:      c.Locals(Csrf),
+			CSRF:      c.Locals(CSRF),
 			"Message": message,
 		})
 	}
 	if message, ok := f.CheckPasswordForCreate(); ok {
 		return c.Render("usercreate", fiber.Map{
-			Csrf:       c.Locals(Csrf),
+			CSRF:       c.Locals(CSRF),
 			"Message":  message,
 			"Username": f.Username})
 	}
@@ -159,7 +159,7 @@ func CreateNewUserPost(c *fiber.Ctx) error {
 	r := models.GetUserByUsername(&models.User{}, f.Username)
 	if !errors.Is(r.Error, gorm.ErrRecordNotFound) {
 		return c.Render("usercreate", fiber.Map{
-			Csrf:      c.Locals(Csrf),
+			CSRF:      c.Locals(CSRF),
 			"Message": fmt.Sprintf("User %s already exists", f.Username),
 		})
 	}
@@ -177,7 +177,7 @@ func CreateNewUserPost(c *fiber.Ctx) error {
 		return err.Error
 	}
 	return c.Render("usercreate", fiber.Map{
-		Csrf:      c.Locals(Csrf),
+		CSRF:      c.Locals(CSRF),
 		"Success": fmt.Sprintf("Succesful create user %s", u.Username),
 	})
 }
@@ -194,14 +194,14 @@ func UserDeletePost(c *fiber.Ctx) error {
 		return deleterr.Error
 	}
 	return c.Render("users", fiber.Map{
-		Csrf:    c.Locals(Csrf),
-		Htmx:    c.Locals(Htmx),
+		CSRF:    c.Locals(CSRF),
+		HTMX:    c.Locals(HTMX),
 		"Users": models.GetAllUsers(),
 	})
 }
 
-func LoginPageGet(c *fiber.Ctx) error {
-	return c.Render("login", fiber.Map{Csrf: c.Locals(Csrf)})
+func LoginGet(c *fiber.Ctx) error {
+	return c.Render("login", fiber.Map{CSRF: c.Locals(CSRF)})
 }
 
 func LoginPost(c *fiber.Ctx) error {
@@ -216,14 +216,14 @@ func LoginPost(c *fiber.Ctx) error {
 	if errors.Is(r.Error, gorm.ErrRecordNotFound) {
 		return c.Render("login", fiber.Map{
 			"Message": "Missmatch username or password",
-			Csrf:      c.Locals(Csrf)},
+			CSRF:      c.Locals(CSRF)},
 		)
 	}
 
 	if err := utils.CompareHashAndPassword(u.Password, f.Password); err != nil {
 		return c.Render("login", fiber.Map{
 			"Message": "Missmatch username or password",
-			Csrf:      c.Locals(Csrf)},
+			CSRF:      c.Locals(CSRF)},
 		)
 	}
 
@@ -243,13 +243,13 @@ func LoginPost(c *fiber.Ctx) error {
 func LogoutGet(c *fiber.Ctx) error {
 	session, err := store.Store.Get(c)
 	if err != nil {
-		return c.RedirectToRoute("auth-login", fiber.Map{})
+		return c.RedirectToRoute("login", fiber.Map{})
 	}
 	err = session.Destroy()
 	if err != nil {
 		return err
 	}
-	return c.RedirectToRoute("auth-login", fiber.Map{})
+	return c.RedirectToRoute("login", fiber.Map{})
 }
 
 func Health(c *fiber.Ctx) error {
@@ -269,12 +269,12 @@ func UserGet(c *fiber.Ctx) error {
 	u := c.Locals(models.USER)
 	user, ok := u.(*models.User)
 	if !ok {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("auth-login", fiber.Map{})
+		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
 	}
 	return c.Status(fiber.StatusOK).Render("templates/index", fiber.Map{models.USER: user})
 }
 
 // [HTMX Middleware]
-// if c.Locals(Htmx).(bool) {
+// if c.Locals(HTMX).(bool) {
 // 	return c.Status(fiber.StatusOK).SendString("<div>Missmatch username or password</biv>")
 // }

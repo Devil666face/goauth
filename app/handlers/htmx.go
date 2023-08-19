@@ -4,9 +4,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-var (
-	Htmx      string = "HTMX"
-	HxRequest string = "Hx-Request"
+const (
+	HTMX      string = "HTMX"
+	HXREQUEST string = "Hx-Request"
 )
 
 func SetHtmx(app fiber.Router) {
@@ -14,9 +14,9 @@ func SetHtmx(app fiber.Router) {
 }
 
 func HtmxMiddleware(c *fiber.Ctx) error {
-	c.Locals(Htmx, false)
-	if _, ok := c.GetReqHeaders()[HxRequest]; ok {
-		c.Locals(Htmx, true)
+	c.Locals(HTMX, false)
+	if _, ok := c.GetReqHeaders()[HXREQUEST]; ok {
+		c.Locals(HTMX, true)
 	}
 	return c.Next()
 }

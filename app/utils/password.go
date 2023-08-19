@@ -4,8 +4,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var (
-	PASS_LEN int = 6
+const (
+	PASSWORDLEN int = 6
 )
 
 func CompareHashAndPassword(f string, s string) error {

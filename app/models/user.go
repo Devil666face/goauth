@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
+const (
 	USER string = "User"
 )
 
@@ -56,8 +56,8 @@ func (form *UserForm) IsPasswordsEmpty() (string, bool) {
 }
 
 func (form *UserForm) IsPasswordsShort() (string, bool) {
-	if len([]rune(form.Password)) < utils.PASS_LEN {
-		return fmt.Sprintf("The minimum len of password is %d", utils.PASS_LEN), true
+	if len([]rune(form.Password)) < utils.PASSWORDLEN {
+		return fmt.Sprintf("The minimum len of password is %d", utils.PASSWORDLEN), true
 	}
 	return "", false
 }
