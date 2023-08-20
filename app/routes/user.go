@@ -8,10 +8,6 @@ import (
 
 func FreeRoutes(app fiber.Router) {
 	auth := app.Group("/auth")
-	auth.Use(
-		handlers.HtmxMiddleware,
-		handlers.TemplatetagMiddleware,
-	)
 	auth.Get("/login", handlers.LoginGet).Name("login")
 	auth.Post("/login", handlers.LoginPost)
 	auth.Get("/logout", handlers.LogoutGet).Name("logout")
@@ -23,8 +19,6 @@ func SuperUserRoutes(app fiber.Router) {
 	auth.Use(
 		handlers.AuthMiddleware,
 		handlers.SuperUserMiddleware,
-		handlers.HtmxMiddleware,
-		handlers.TemplatetagMiddleware,
 	)
 
 	auth.Get("/users", handlers.UserControlGet).Name("users")
@@ -38,6 +32,6 @@ func SuperUserRoutes(app fiber.Router) {
 }
 
 func AuthRoutes(app fiber.Router) {
-	free := app.Group("")
-	free.Get("/user", handlers.AuthMiddleware, handlers.UserGet)
+	app.Use(handlers.AuthMiddleware)
+	app.Get("/user", handlers.UserGet)
 }

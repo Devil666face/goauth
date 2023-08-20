@@ -14,8 +14,8 @@ const (
 	CSRF string = "csrf"
 )
 
-func SetCsrf(app fiber.Router) {
-	app.Use(csrf.New(csrf.Config{
+func CsrfMiddleware(c *fiber.Ctx) error {
+	return csrf.New(csrf.Config{
 		Storage:        store.Storage,
 		KeyLookup:      "form:csrf",
 		CookieName:     "csrf_",
@@ -23,5 +23,5 @@ func SetCsrf(app fiber.Router) {
 		Expiration:     1 * time.Hour,
 		KeyGenerator:   utils.UUID,
 		ContextKey:     "csrf",
-	}))
+	})(c)
 }

@@ -21,10 +21,6 @@ import (
 	"github.com/gofiber/template/html/v2"
 )
 
-var (
-	APP *fiber.App
-)
-
 func main() {
 	database.Connect()
 	store.SetStore()
@@ -48,8 +44,11 @@ func main() {
 			Views:        utils.SetTampletatags(html.NewFileSystem(http.FS(assets.Viewfs), ".html")),
 		})
 
-		handlers.SetHtmx(app)
-		handlers.SetCsrf(app)
+		app.Use(
+			handlers.HtmxMiddleware,
+			handlers.CsrfMiddleware,
+			handlers.TemplatetagMiddleware,
+		)
 
 		routes.FreeRoutes(app)
 		routes.SuperUserRoutes(app)
@@ -70,7 +69,6 @@ func main() {
 			Title: fmt.Sprintf("%v:%v - metrics", config.IP, config.PORT),
 		}))
 		app.Use(logger.New())
-		APP = app
 		app.Listen(fmt.Sprintf("%v:%v", config.IP, config.PORT))
 	}
 }

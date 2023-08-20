@@ -2,17 +2,18 @@ package config
 
 import (
 	"fmt"
-	_ "github.com/joho/godotenv/autoload"
 	"os"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 var (
-	IP   = getEnv("IP", "127.0.0.1")
-	PORT = getEnv("PORT", "8000")
-	DB   = getEnv("DB", "db.sqlite3")
+	IP   = env("IP", "127.0.0.1")
+	PORT = env("PORT", "8000")
+	DB   = env("DB", "db.sqlite3")
 )
 
-func getEnv(name string, fallback string) string {
+func env(name string, fallback string) string {
 	if value, exists := os.LookupEnv(name); exists {
 		return value
 	}
@@ -26,8 +27,8 @@ func getEnv(name string, fallback string) string {
 
 func GetSuperuser() (string, string) {
 	var (
-		USER = getEnv("SUUSER", "superuser")
-		PASS = getEnv("SUPASS", "Qwerty123!")
+		USER = env("SUUSER", "superuser")
+		PASS = env("SUPASS", "Qwerty123!")
 	)
 	return USER, PASS
 }
