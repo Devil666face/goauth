@@ -15,10 +15,10 @@ import (
 	"auth/app/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/template/html/v2"
-	"github.com/soypat/rebed"
 )
 
 func main() {
@@ -52,14 +52,16 @@ func main() {
 		routes.AuthRoutes(app)
 
 		// [static](https://docs.gofiber.io/api/app#static)
-		staticConfig := fiber.Static{
+		app.Use("/static", filesystem.New(filesystem.Config{
+			Root:       http.FS(assets.Staticfs),
+			PathPrefix: "static",
+			MaxAge:     86400,
+		}))
+		app.Static("/media", utils.SetPath(assets.Mediadir), fiber.Static{
 			Compress:  true,
 			ByteRange: true,
 			// Browse:    true,
-		}
-		rebed.Write(assets.Staticfs, ".")
-		app.Static("/static", utils.SetPath(assets.Staticdir), staticConfig)
-		app.Static("/media", utils.SetPath(assets.Mediadir), staticConfig)
+		})
 		app.Get("/metrics", monitor.New(monitor.Config{
 			Title: fmt.Sprintf("%v:%v - metrics", config.IP, config.PORT),
 		}))
@@ -68,13 +70,9 @@ func main() {
 	}
 }
 
-// "github.com/gofiber/fiber/v2/middleware/filesystem"
-// [Embed static]
-// app.Use("/static", filesystem.New(filesystem.Config{
-// 	Root:       http.FS(assets.Staticfs),
-// 	PathPrefix: "static",
-// 	Browse:     false,
-// }))
+// "github.com/soypat/rebed"
+// rebed.Write(assets.Staticfs, ".")
+// app.Static("/static", utils.SetPath(assets.Staticdir), staticConfig)
 
 // "github.com/gofiber/template/django/v3"
 // [Django templates]
