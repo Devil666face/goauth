@@ -2,7 +2,7 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-cmd = "CGO_ENABLED=1 CGO_CFLAGS='-g -O2 -Wno-return-local-addr' go build -o tmp/main app/cmd/main.go"
+cmd = "CGO_ENABLED=1 CGO_CFLAGS='-g -O2 -Wno-return-local-addr' go build -o tmp/main main.go"
 bin = "tmp/main"
 # Customize binary.
 full_bin = "tmp/main"
