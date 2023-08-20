@@ -142,6 +142,7 @@ func UserCreatePost(c *fiber.Ctx) error {
 	if err := c.BodyParser(f); err != nil {
 		return err
 	}
+	u := models.User{Username: f.Username, Password: "", Admin: f.IsAdmin()}
 
 	if message, ok := f.IsEmptyUsername(); ok {
 		return c.Render("usercreate", fiber.Map{
@@ -151,16 +152,18 @@ func UserCreatePost(c *fiber.Ctx) error {
 	}
 	if message, ok := f.CheckPasswordForCreate(); ok {
 		return c.Render("usercreate", fiber.Map{
-			CSRF:       c.Locals(CSRF),
-			"Message":  message,
-			"Username": f.Username})
+			CSRF:        c.Locals(CSRF),
+			"Message":   message,
+			models.USER: u,
+		})
 	}
 
 	r := models.GetUserByUsername(&models.User{}, f.Username)
 	if !errors.Is(r.Error, gorm.ErrRecordNotFound) {
 		return c.Render("usercreate", fiber.Map{
-			CSRF:      c.Locals(CSRF),
-			"Message": fmt.Sprintf("User %s already exists", f.Username),
+			CSRF:        c.Locals(CSRF),
+			"Message":   fmt.Sprintf("User %s already exists", f.Username),
+			models.USER: u,
 		})
 	}
 
@@ -168,8 +171,7 @@ func UserCreatePost(c *fiber.Ctx) error {
 	if bcerr != nil {
 		return bcerr
 	}
-
-	u := models.User{Username: f.Username, Password: string(password), Admin: f.IsAdmin()}
+	u.Password = string(password)
 
 	err := models.CreateUser(&u)
 
@@ -177,8 +179,9 @@ func UserCreatePost(c *fiber.Ctx) error {
 		return err.Error
 	}
 	return c.Render("usercreate", fiber.Map{
-		CSRF:      c.Locals(CSRF),
-		"Success": fmt.Sprintf("Succesful create user %s", u.Username),
+		CSRF:        c.Locals(CSRF),
+		"Success":   fmt.Sprintf("Succesful create user %s", u.Username),
+		models.USER: u,
 	})
 }
 
