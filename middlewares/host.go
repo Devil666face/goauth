@@ -1,9 +1,9 @@
-package handlers
+package middlewares
 
 import (
 	"strings"
 
-	"auth/app/config"
+	"app/config"
 
 	"github.com/gofiber/fiber/v2"
 )

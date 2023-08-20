@@ -1,9 +1,9 @@
 package database
 
 import (
-	"auth/app/config"
-	"fmt"
 	"time"
+
+	"app/config"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -12,17 +12,16 @@ import (
 
 var DB *gorm.DB
 
-func Connect() {
+func Connect() error {
 	db, err := gorm.Open(sqlite.Open(config.DB), &gorm.Config{
 		NowFunc: func() time.Time { return time.Now().Local() },
 		Logger:  logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
-		fmt.Println("database connection error")
-		panic(err)
+		return err
 	}
 	DB = db
-	fmt.Println("database connected")
+	return nil
 }
 
 func Migrate(tables ...interface{}) error {

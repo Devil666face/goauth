@@ -4,51 +4,14 @@ import (
 	"errors"
 	"fmt"
 
-	"auth/app/models"
-	"auth/app/store"
-	"auth/app/utils"
+	. "app/middlewares"
+	"app/models"
+	"app/store"
+	"app/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
-
-func AuthMiddleware(c *fiber.Ctx) error {
-	session, err := store.Store.Get(c)
-
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
-	}
-
-	if session.Get(store.AUTH_KEY) == nil {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
-	}
-
-	uid := session.Get(store.USER_ID)
-	if uid == nil {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
-	}
-
-	u := new(models.User)
-	if models.GetUser(u, fmt.Sprint(uid)); err != nil {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
-	}
-
-	c.Locals(models.USER, u)
-
-	return c.Next()
-}
-
-func SuperUserMiddleware(c *fiber.Ctx) error {
-	u := c.Locals(models.USER)
-	user, ok := u.(*models.User)
-	if !ok {
-		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
-	}
-	if !user.Admin {
-		return fiber.ErrNotFound
-	}
-	return c.Next()
-}
 
 func UserControlGet(c *fiber.Ctx) error {
 	return c.Render("users", fiber.Map{
@@ -276,8 +239,3 @@ func UserGet(c *fiber.Ctx) error {
 	}
 	return c.Status(fiber.StatusOK).Render("templates/index", fiber.Map{models.USER: user})
 }
-
-// [HTMX Middleware]
-// if c.Locals(HTMX).(bool) {
-// 	return c.Status(fiber.StatusOK).SendString("<div>Missmatch username or password</biv>")
-// }

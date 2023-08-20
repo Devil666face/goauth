@@ -1,9 +1,9 @@
-package handlers
+package middlewares
 
 import (
 	"time"
 
-	"auth/app/store"
+	"app/store"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/csrf"

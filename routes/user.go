@@ -1,7 +1,9 @@
 package routes
 
 import (
-	"auth/app/handlers"
+	"app/handlers"
+
+	. "app/middlewares"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,8 +19,8 @@ func FreeRoutes(app fiber.Router) {
 func SuperUserRoutes(app fiber.Router) {
 	auth := app.Group("/auth")
 	auth.Use(
-		handlers.AuthMiddleware,
-		handlers.SuperUserMiddleware,
+		AuthMiddleware,
+		SuperUserMiddleware,
 	)
 
 	auth.Get("/users", handlers.UserControlGet).Name("users")
@@ -32,6 +34,6 @@ func SuperUserRoutes(app fiber.Router) {
 }
 
 func AuthRoutes(app fiber.Router) {
-	app.Use(handlers.AuthMiddleware)
+	app.Use(AuthMiddleware)
 	app.Get("/user", handlers.UserGet)
 }

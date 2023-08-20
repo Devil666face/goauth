@@ -1,14 +1,14 @@
-package cli
+package cmd
 
 import (
 	"flag"
 	"fmt"
 )
 
-var (
-	ReturnStart     int = 0
-	ReturnMigrate   int = 1
-	ReturnSuperuser int = 2
+const (
+	START     int = 0
+	MIGRATE   int = 1
+	SUPERUSER int = 2
 )
 
 func SetCli() int {
@@ -17,12 +17,12 @@ func SetCli() int {
 	flag.Parse()
 	if *migrate {
 		fmt.Println("Start migrations")
-		return ReturnMigrate
+		return MIGRATE
 	}
 	if *superuser {
 		fmt.Println("Create superuser")
-		return ReturnSuperuser
+		return SUPERUSER
 	}
 	fmt.Println("Start server")
-	return ReturnStart
+	return START
 }

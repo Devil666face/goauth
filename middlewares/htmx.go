@@ -1,4 +1,4 @@
-package handlers
+package middlewares
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -16,3 +16,8 @@ func HtmxMiddleware(c *fiber.Ctx) error {
 	}
 	return c.Next()
 }
+
+// [HTMX Middleware]
+// if c.Locals(HTMX).(bool) {
+// 	return c.Status(fiber.StatusOK).SendString("<div>Missmatch username or password</biv>")
+// }

@@ -3,8 +3,8 @@ package models
 import (
 	"fmt"
 
-	"auth/app/database"
-	"auth/app/utils"
+	"app/database"
+	"app/utils"
 
 	"gorm.io/gorm"
 )

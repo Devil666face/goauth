@@ -1,5 +1,5 @@
 run:
-	go build -o tmp/main app/cmd/main.go
+	go build -o tmp/main main.go
 	tmp/main
 clear:
 	rm -rf static

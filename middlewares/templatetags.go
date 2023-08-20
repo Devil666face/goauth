@@ -1,7 +1,7 @@
-package handlers
+package middlewares
 
 import (
-	"auth/app/utils"
+	"app/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
