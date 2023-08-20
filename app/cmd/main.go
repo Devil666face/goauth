@@ -43,18 +43,6 @@ func main() {
 			ErrorHandler: utils.ErrorHandler,
 			Views:        utils.SetTampletatags(html.NewFileSystem(http.FS(assets.Viewfs), ".html")),
 		})
-
-		app.Use(
-			handlers.HtmxMiddleware,
-			handlers.CsrfMiddleware,
-			handlers.TemplatetagMiddleware,
-		)
-
-		routes.FreeRoutes(app)
-		routes.SuperUserRoutes(app)
-		routes.AuthRoutes(app)
-
-		// [static](https://docs.gofiber.io/api/app#static)
 		app.Use("/static", filesystem.New(filesystem.Config{
 			Root:       http.FS(assets.Staticfs),
 			PathPrefix: "static",
@@ -68,6 +56,18 @@ func main() {
 		app.Get("/metrics", monitor.New(monitor.Config{
 			Title: fmt.Sprintf("%v:%v - metrics", config.IP, config.PORT),
 		}))
+
+		app.Use(
+			handlers.AllowedHostMiddleware,
+			handlers.HtmxMiddleware,
+			handlers.CsrfMiddleware,
+			handlers.TemplatetagMiddleware,
+		)
+
+		routes.FreeRoutes(app)
+		routes.SuperUserRoutes(app)
+		routes.AuthRoutes(app)
+
 		app.Use(logger.New())
 		app.Listen(fmt.Sprintf("%v:%v", config.IP, config.PORT))
 	}
