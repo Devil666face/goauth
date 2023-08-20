@@ -2,10 +2,10 @@
 <div class="modal-header">
 	<h1 class="modal-title fs-5" id="staticBackdropLabel">{{if .User.Username}}📝 Edit {{.User.Username}}{{else}}🙍‍♂️
 		Create user{{end}}</h1>
-	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" hx-get="/auth/users"
+	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" hx-get='{{ Url "users" }}'
 		hx-swap="innerHTML" hx-target="#users"></button>
 </div>
-<form hx-post="/auth/user/{{.User.ID}}/edit" hx-swap="innerHTML" hx-target="#edit_user_content">
+<form hx-post='{{ UrlTo "user-edit" "id" .User.ID }}' hx-swap="innerHTML" hx-target="#edit_user_content">
 	{{template "userform" . }}
 </form>
 {{end}}

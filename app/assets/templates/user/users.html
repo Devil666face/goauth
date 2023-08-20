@@ -9,7 +9,8 @@
     <div class="row">
       <div class="col">
         <button type="button" class="btn btn-outline-primary form-control mb-2" data-bs-toggle="modal"
-          data-bs-target="#create_user" hx-get="/auth/user/new" hx-swap="innerHTML" hx-target="#create_user_content">
+          data-bs-target="#create_user" hx-get='{{ Url "user-new" }}' hx-swap="innerHTML"
+          hx-target="#create_user_content">
           Create user 🙍‍♂️
         </button>
       </div>
@@ -29,13 +30,13 @@
         </div>
         <div class="col">
           <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#edit_user"
-            hx-get="/auth/user/{{.ID}}/edit" hx-swap="innerHTML" hx-target="#edit_user_content">
+            hx-get='{{ UrlTo "user-edit" "id" .ID }}' hx-swap="innerHTML" hx-target="#edit_user_content">
             Edit 📝
           </button>
         </div>
         <div class="col">
           <button type="button" class="btn btn-outline-danger" hx-confirm="🗑 Delete user - {{.Username}}?"
-            hx-swap="innerHTML" hx-delete="/auth/user/{{.ID}}/delete" hx-target="#users">
+            hx-swap="innerHTML" hx-delete='{{ UrlTo "user-delete" "id" .ID }}' hx-target="#users">
             Delete 🗑
           </button>
         </div>

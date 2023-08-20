@@ -21,6 +21,10 @@ import (
 	"github.com/gofiber/template/html/v2"
 )
 
+var (
+	APP *fiber.App
+)
+
 func main() {
 	database.Connect()
 	store.SetStore()
@@ -66,6 +70,7 @@ func main() {
 			Title: fmt.Sprintf("%v:%v - metrics", config.IP, config.PORT),
 		}))
 		app.Use(logger.New())
+		APP = app
 		app.Listen(fmt.Sprintf("%v:%v", config.IP, config.PORT))
 	}
 }
