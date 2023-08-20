@@ -6,8 +6,8 @@ import (
 )
 
 func SetPath(dir string) string {
-	BASE_DIR, _ := os.Getwd()
-	dirPath, _ := filepath.Abs(filepath.Join(BASE_DIR, dir))
+	baseDir, _ := os.Getwd()
+	dirPath, _ := filepath.Abs(filepath.Join(baseDir, dir))
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 		os.MkdirAll(dirPath, os.ModePerm)
 	}

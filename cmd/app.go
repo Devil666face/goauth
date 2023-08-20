@@ -46,6 +46,7 @@ func StartApp() error {
 		ErrorHandler: utils.ErrorHandler,
 		Views:        utils.SetTampletatags(html.NewFileSystem(http.FS(assets.Viewfs), ".html")),
 	})
+	app.Use(logger.New())
 	app.Use("/static", filesystem.New(filesystem.Config{
 		Root:       http.FS(assets.Staticfs),
 		PathPrefix: "static",
@@ -71,7 +72,6 @@ func StartApp() error {
 	routes.SuperUserRoutes(app)
 	routes.AuthRoutes(app)
 
-	app.Use(logger.New())
 	err := app.Listen(fmt.Sprintf("%v:%v", config.IP, config.PORT))
 	if err != nil {
 		return err
