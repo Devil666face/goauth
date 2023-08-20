@@ -1,6 +1,16 @@
-<h1>
-	{{.Statuscode}}
-</h1>
-<p>
-	{{.Error}}
-</p>
+{{define "error"}}
+{{template "head" .Title }}
+
+<body>
+	<div class="container pt-5">
+		<h1>
+			{{.Statuscode}}
+		</h1>
+		<p>
+			{{.Error}}
+		</p>
+	</div>
+</body>
+
+{{template "tail" . }}
+{{end}}
