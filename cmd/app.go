@@ -57,11 +57,10 @@ func StartApp() error {
 		ByteRange: true,
 		// Browse:    true,
 	})
-	app.Get("/metrics", monitor.New(monitor.Config{
-		Title: fmt.Sprintf("%v:%v - metrics", config.IP, config.PORT),
-	}))
+	app.Get("/metrics", monitor.New(monitor.Config{}))
 
 	app.Use(
+		middlewares.HttpsRedirectMiddleware,
 		middlewares.AllowedHostMiddleware,
 		middlewares.HtmxMiddleware,
 		middlewares.CsrfMiddleware,
@@ -72,7 +71,19 @@ func StartApp() error {
 	routes.SuperUserRoutes(app)
 	routes.AuthRoutes(app)
 
-	err := app.Listen(fmt.Sprintf("%v:%v", config.IP, config.PORT))
+	if config.TLS == "True" {
+		go func() {
+			err := app.Listen(config.CONNECT_HTTP)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+		}()
+		err := app.ListenTLS(config.CONNECT_HTTPS, config.TLS_CRT, config.TLS_KEY)
+		if err != nil {
+			return err
+		}
+	}
+	err := app.Listen(config.CONNECT_HTTP)
 	if err != nil {
 		return err
 	}

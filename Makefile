@@ -19,10 +19,13 @@ clear: ## Clear temp dirs
 	tmp/main -superuser
 
 air: ## Run dev server
-	$(shell which air)
+	~/go/bin/air
 
 air-install: ## Install air
 	go install github.com/cosmtrek/air@latest
 
 help: ## Prints help for targets with comments
 	@cat $(MAKEFILE_LIST) | grep -E '^[a-zA-Z_-]+:.*?## .*$$' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+gencert: ## Generate server.key and server.crt
+	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server.key -out server.crt

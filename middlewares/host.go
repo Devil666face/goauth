@@ -14,7 +14,7 @@ const (
 
 func AllowedHostMiddleware(c *fiber.Ctx) error {
 	if host, ok := c.GetReqHeaders()[HOST]; ok {
-		if strings.Contains(host, config.ALLOWED) {
+		if strings.Contains(host, config.ALLOW_HOST) {
 			return c.Next()
 		}
 	}

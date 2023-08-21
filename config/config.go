@@ -8,10 +8,16 @@ import (
 )
 
 var (
-	IP      = env("IP", "127.0.0.1")
-	PORT    = env("PORT", "8000")
-	DB      = env("DB", "db.sqlite3")
-	ALLOWED = env("ALLOWED", "localhost")
+	IP            = env("IP", "127.0.0.1")
+	HTTP_PORT     = env("HTTP_PORT", "8000")
+	HTTPS_PORT    = env("HTTPS_PORT", "4443")
+	DB            = env("DB", "db.sqlite3")
+	ALLOW_HOST    = env("ALLOW_HOST", "localhost")
+	TLS           = env("TLS", "False")
+	TLS_KEY       = env("TLS_KEY", "server.key")
+	TLS_CRT       = env("TLC_CRT", "server.crt")
+	CONNECT_HTTP  = fmt.Sprintf("%v:%v", IP, HTTP_PORT)
+	CONNECT_HTTPS = fmt.Sprintf("%v:%v", IP, HTTPS_PORT)
 )
 
 func env(name string, fallback string) string {
