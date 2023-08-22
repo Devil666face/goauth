@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"fmt"
-	// "strings"
 
 	"app/config"
 
@@ -10,15 +9,9 @@ import (
 )
 
 const (
-	HTTP string = "http"
+	PROTO string = "https"
 )
 
 func HttpsRedirectMiddleware(c *fiber.Ctx) error {
-	if config.TLS != "True" {
-		return c.Next()
-	}
-	if c.Protocol() == HTTP {
-		return c.Redirect(fmt.Sprintf("https://%s", config.CONNECT_HTTPS))
-	}
-	return c.Next()
+	return c.Redirect(fmt.Sprintf("%s://%s:%s", PROTO, config.ALLOW_HOST, config.HTTPS_PORT))
 }

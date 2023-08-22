@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"net/http"
 
 	"app/assets"
@@ -60,7 +59,6 @@ func StartApp() error {
 	app.Get("/metrics", monitor.New(monitor.Config{}))
 
 	app.Use(
-		middlewares.HttpsRedirectMiddleware,
 		middlewares.AllowedHostMiddleware,
 		middlewares.HtmxMiddleware,
 		middlewares.CsrfMiddleware,
@@ -71,11 +69,13 @@ func StartApp() error {
 	routes.SuperUserRoutes(app)
 	routes.AuthRoutes(app)
 
-	if config.TLS == "True" {
+	if config.TLS {
 		go func() {
-			err := app.Listen(config.CONNECT_HTTP)
+			httpapp := fiber.New(fiber.Config{DisableStartupMessage: true})
+			httpapp.Use(middlewares.HttpsRedirectMiddleware)
+			err := httpapp.Listen(config.CONNECT_HTTP)
 			if err != nil {
-				fmt.Println(err.Error())
+				panic(err)
 			}
 		}()
 		err := app.ListenTLS(config.CONNECT_HTTPS, config.TLS_CRT, config.TLS_KEY)

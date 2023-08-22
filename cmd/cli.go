@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"flag"
-	"fmt"
 )
 
 const (
@@ -16,13 +15,10 @@ func SetCli() int {
 	superuser := flag.Bool("superuser", false, "Create superuser set envs SUUSER=User and SUPASS=Password")
 	flag.Parse()
 	if *migrate {
-		fmt.Println("Start migrations")
 		return MIGRATE
 	}
 	if *superuser {
-		fmt.Println("Create superuser")
 		return SUPERUSER
 	}
-	fmt.Println("Start server")
 	return START
 }

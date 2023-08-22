@@ -13,7 +13,7 @@ var (
 	HTTPS_PORT    = env("HTTPS_PORT", "4443")
 	DB            = env("DB", "db.sqlite3")
 	ALLOW_HOST    = env("ALLOW_HOST", "localhost")
-	TLS           = env("TLS", "False")
+	TLS           = boolenv(env("TLS", "False"))
 	TLS_KEY       = env("TLS_KEY", "server.key")
 	TLS_CRT       = env("TLC_CRT", "server.crt")
 	CONNECT_HTTP  = fmt.Sprintf("%v:%v", IP, HTTP_PORT)
@@ -28,6 +28,13 @@ func env(name string, fallback string) string {
 		return fallback
 	}
 	panic(fmt.Sprintf(`Environment variable not found %v`, name))
+}
+
+func boolenv(env string) bool {
+	if env == "True" || env == "true" {
+		return true
+	}
+	return false
 }
 
 func GetSuperuser() (string, string) {
