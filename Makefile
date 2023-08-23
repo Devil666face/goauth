@@ -1,10 +1,11 @@
 GOOS=linux
 GOARCH=amd64
+CGO_ENABLED=1
 LDFLAGS="-w -s"
 APP=app
 
 build: ## Build project
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags=$(LDFLAGS) -o $(APP) main.go
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags=$(LDFLAGS) -o $(APP) main.go
 
 run: ## Temp build and run
 	go build -o tmp/main main.go
