@@ -237,5 +237,5 @@ func UserGet(c *fiber.Ctx) error {
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).RedirectToRoute("login", fiber.Map{})
 	}
-	return c.Status(fiber.StatusOK).Render("templates/index", fiber.Map{models.USER: user})
+	return c.Status(fiber.StatusOK).Render("index", fiber.Map{models.USER: user})
 }

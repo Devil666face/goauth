@@ -1,1 +1,36 @@
-{{.User.Username}}
+{{define "index"}}
+{{with $title:="Editor"}}
+{{template "head" $title }}
+{{end}}
+
+<head>
+  <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+</head>
+
+<body>
+  {{.User.Username}}
+  <div id="editor"></div>
+
+  <button type="button" class="btn btn-outline-secondary form-control" aria-label="Edit" hx-post="/user"
+    hx-vals='js:{content: editor.getMarkdown()}'>Edit</button>
+
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+
+  <script>
+    const editor = new toastui.Editor({
+      el: document.querySelector('#editor'),
+      previewStyle: 'vertical',
+      initialEditType: 'markdown',
+      height: 'auto',
+      theme: 'dark',
+      initialValue: "# Test",
+    });
+    editor.addHook('keydown', (event) => {
+      console.log(editor.getMarkdown());
+    });
+  </script>
+
+</body>
+
+{{template "tail" . }}
+{{end}}
