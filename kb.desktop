@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=KbSwitch
+GenericName=Switch keyboard
+Comment=Switch keyboard layout on autostart gnome
+Exec=/usr/bin/setxkbmap -layout us,ru -option 'grp:lalt_lshift_toggle'
+Terminal=false
+Type=Application
+X-GNOME-Autostart-enabled=true
